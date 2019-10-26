@@ -4,7 +4,7 @@ import bluetooth
 import json
 import requests
 import threading
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from dps310 import DPS310
 from btxmt import BTServer
 
@@ -13,11 +13,13 @@ PORT = 1
 RECV_SIZE = 1024
 MY_ADDR = 'B8:27:EB:56:A1:68'
 
+PIN = 21
+TIMEOUT = 3000 # mill sec
 
 def connect_with_neck():
     global data_list
     global bow_flag
-    global bow_id
+    global start_flag
     dps310 = DPS310()
 
     bt_server = BTServer(PORT)
@@ -36,6 +38,13 @@ def connect_with_neck():
                     p_neck = float(recv_data.split('p')[-1])
                     if bow_flag:
                         timestamp = datetime.today().timestamp()
+                        if start_flag:
+                            bow_id = timestamp
+                            standard_p_neck = p_neck
+                            start_flag = False
+                        else:
+                            if timestamp - bow_id > 2 and p_neck < standard_p_neck + 0.1:
+                                bow_flag = False
                         data = {
                             "timestamp": bow_id,
                             "time": timestamp,
@@ -55,15 +64,20 @@ def connect_with_neck():
 
 def gpio():
     global bow_flag
-    global bow_id
+    global start_flag
     while True:
-        # if push switch
-        print("gpio")
-        bow_id = datetime.today().timestamp()
-        bow_flag = True
-        sleep(20)
-        bow_flag = False
-        sleep(20)
+        try:
+            GPIO.wait_for_edge(PIN, GPIO.FALLING)
+            pin = GPIO.wait_for_edge(PIN, GPIO.RISING, timeout=TIMEOUT)
+            if pin is not None:
+                bow_flag = True
+                start_flag = True
+            else:
+                print('Calibration')
+
+        except Exception as e:
+            print(e)
+            print("gpio")
 
 def post_json():
     global data_list
@@ -86,7 +100,9 @@ def post_json():
 if __name__ == '__main__':
     data_list = []
     bow_flag = False
-    bow_id = 0
+    start_flag = False
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     thread_1 = threading.Thread(target=connect_with_neck)
     thread_2 = threading.Thread(target=gpio)
     thread_3 = threading.Thread(target=post_json)
