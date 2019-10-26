@@ -14,7 +14,7 @@ RECV_SIZE = 1024
 WF_ADDR = 'b8:27:eb:a9:5e:97'
 
 PIN = 21
-TIMEOUT = 3000 # mill sec
+TIMEOUT = 3000 # milli sec
 
 URL = 'http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com'
 
@@ -44,7 +44,7 @@ def connect_with_neck():
                     if calibration_flag:
                         offset_p = p_neck - p_waist
                         calibration_flag = False
-                        print(f'neck:{p_neck},waist:{p_waist},offset:{offset_p}')
+                        print(f'Neck: {p_neck}, Waist: {p_waist}, Offset:{offset_p}')
                     p_waist += offset_p
 
                     if bow_flag:
@@ -54,7 +54,9 @@ def connect_with_neck():
                             standard_p_neck = p_neck
                             start_flag = False
                         else:
-                            if timestamp - bow_id > 2 and p_neck < standard_p_neck + 0.1:
+                            if (timestamp - bow_id > 2 and
+                                p_neck < standard_p_neck + 0.5):
+                                # + 0.5 [Pa] は 4.5-5 cm 程度のズレを許容する項
                                 bow_flag = False
                                 try:
                                     response = requests.get(f'{URL}/register?timestamp={bow_id}&mac_address={WF_ADDR}')
