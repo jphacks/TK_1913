@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Runtime.InteropServices;
 using UnityEngine.Networking;
+using System;  
+using System.IO;  
+using System.Net; 
+using System.Linq;
 
 public class Komachi_bow : MonoBehaviour
 {
@@ -24,8 +28,8 @@ public class Komachi_bow : MonoBehaviour
   HumanPoseHandler handler;
   AngleControl angleControlScript;
 
-  string csvText;
-  List<string[]> csvLines;
+  private string csvText;
+  private List<float[]> csvLines;
   enum Muscles : int
   {
     SpineFrontBack,
@@ -134,6 +138,9 @@ public class Komachi_bow : MonoBehaviour
   float timer;
   [SerializeField]
   private float huga = 0;
+  public float t;
+  private float startTime;
+  public int lineNum;
 
 
   // Use this for initialization
@@ -150,27 +157,34 @@ public class Komachi_bow : MonoBehaviour
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
 
-    anim = GetComponent<Animator>();
+    //anim = GetComponent<Animator>();
     //Get them_Animator, which you attach to the GameObject you intend to animate.
-    m_Animator = gameObject.GetComponent<Animator>();
+    //m_Animator = gameObject.GetComponent<Animator>();
     //Fetch the current Animation clip information for the base layer
-    m_CurrentClipInfo = this.m_Animator.GetCurrentAnimatorClipInfo(0);
+    //m_CurrentClipInfo = this.m_Animator.GetCurrentAnimatorClipInfo(0);
     //Access the current length of the clip
-    m_CurrentClipLength = m_CurrentClipInfo[0].clip.length;
+    //m_CurrentClipLength = m_CurrentClipInfo[0].clip.length;
     //Access the Animation clip name
-    m_ClipName = m_CurrentClipInfo[0].clip.name;
+    //m_ClipName = m_CurrentClipInfo[0].clip.name;
     //print(m_CurrentClipLength);
-    timer = (1 / m_CurrentClipLength) / 60;
-    StartCoroutine(GetText("https://www.e-stat.go.jp/stat-search/file-download?statInfId=000031524010&fileKind=1"));
-    ReadCsv(csvText);
+    //timer = (1 / m_CurrentClipLength) / 60;
+    csvText = GetText("http://localhost:8000/a.txt");
+    //Debug.Log(csvText);
+    csvLines = ReadCsv(csvText);
+    startTime = csvLines[0][0];
+    Debug.Log(startTime);
+    lineNum = 0;
   }
 
   // Update is called once per frame
   void Update()
   {
+    t += Time.deltaTime;
     // musclesStatus ();
-    // getSliderValue();
-    moveAnimationBySlider();
+    getPoseFromCsv(csvLines, startTime);
+    //getSliderValue();
+    handler.SetHumanPose(ref miraiPose);
+    // moveAnimationBySlider();
     // string rcv_data = TestJsInCs();
     // string rcv_data = ReadAnimationValue();
     // moveAnimationByText(rcv_data);
@@ -244,20 +258,73 @@ public class Komachi_bow : MonoBehaviour
     }
   }
 
+private void getPoseFromCsv(List<float[]> csvLines, float startTime)
+  {
+    Debug.Log(t);
+    for (int i=lineNum;i<csvLines.Count-1;i++){
+      if (csvLines[i][0]-startTime <= t && t < csvLines[i+1][0]-startTime)
+      {
+        Debug.Log((t-csvLines[i][0]));
+        float ratio = (t-csvLines[i][0]+startTime)/(csvLines[i+1][0]-csvLines[i][0]);
+        Debug.Log(ratio);
+        float sliderValue = linear(csvLines[i][1], csvLines[i+1][1], ratio);
+        Debug.Log(sliderValue);
+        // [parameters of bow_3]
+        // 21 Left  Upper Leg Front-Back  :  [0.5 ~ -0.5]
+        // 29 Right Upper Leg Front-Back  :  [0.5 ~ -0.5]
+        // 0  Spine Front-Back            :  [0.0 ~ -0.5]
+        // ?  Root Q.x                    :  [0.0 ~ 0.6]
+        miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 1f * sliderValue;
+        miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 1f * sliderValue;
+        miraiPose.muscles[(int)Muscles.SpineFrontBack] = 0.0f - 0.5f * sliderValue;
+
+        float rot = getRot(sliderValue);
+        miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
+        return;
+      }
+    }
+    Debug.Log("out");
+    t = 0f;
+    initUpRightPose();
+
+  }
   private void getSliderValue()
   {
     float sliderValue = angleControlScript.getAngleSliderNormalizedValue();
     // [parameters of bow_3]
-    // 21 Left  Upper Leg Front-Back  :  [0.5 ~ 0.0]
-    // 29 Right Upper Leg Front-Back  :  [0.5 ~ 0.0]
+    // 21 Left  Upper Leg Front-Back  :  [0.5 ~ -0.5]
+    // 29 Right Upper Leg Front-Back  :  [0.5 ~ -0.5]
     // 0  Spine Front-Back            :  [0.0 ~ -0.5]
-    // ?  Root Q.x                    :  [0.0 ~ 0.3]
-    miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
-    miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
+    // ?  Root Q.x                    :  [0.0 ~ 0.6]
+    miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 1f * sliderValue;
+    miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 1f * sliderValue;
     miraiPose.muscles[(int)Muscles.SpineFrontBack] = 0.0f - 0.5f * sliderValue;
 
-    float rot = 130 * (0.0f + 0.3f * sliderValue);
+    float rot = getRot(sliderValue);
+   // float rot = 130* 0.5f *sliderValue;
     miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
+  }
+
+  private float linear(float min, float max, float ratio)
+  {
+    return (1-ratio)*min + ratio*max;
+  }
+  private float getRot(float ratio)
+  {
+    float thres1 = 0.5f;
+    float tilt1 = 0.5f;
+    float max1 = thres1*130*tilt1;
+
+    if (ratio < thres1)
+    {
+      return linear(0, max1, ratio/thres1);
+    }  else if(ratio >= thres1)
+    {
+      return linear(max1, 130*0.65f, (ratio-thres1)/(1-thres1));
+    } else {
+      return 130 * 0.65f * ratio;
+    }
+
   }
 
   private string TestJsInCs()
@@ -265,42 +332,50 @@ public class Komachi_bow : MonoBehaviour
     return TestJs();
   }
 
-  IEnumerator GetText(string url)
+  string GetText(string url)
   {
-    using (UnityWebRequest www = UnityWebRequest.Get(url))
+    WebRequest request = WebRequest.Create(url);
+    
+    // Get the response.  
+    WebResponse response = request.GetResponse();
+    string responseFromServer;
+    // Get the stream containing content returned by the server. 
+    // The using block ensures the stream is automatically closed. 
+    using (Stream dataStream = response.GetResponseStream())
     {
-      yield return www.SendWebRequest();
-
-      if (www.isNetworkError || www.isHttpError)
-      {
-        Debug.Log(www.error);
-      }
-      else
-      {
-        csvText = www.downloadHandler.text;
-        // Show results as text
-        Debug.Log(csvText);
-      }
+        // Open the stream using a StreamReader for easy access.  
+        StreamReader reader = new StreamReader(dataStream);
+        // Read the content.  
+        responseFromServer = reader.ReadToEnd();
+        // Display the content.  
+        //Debug.Log(responseFromServer);
     }
+
+    // Close the response.  
+    response.Close();
+
+    return responseFromServer;
+
   }
 
-  List<string[]> ReadCsv(string text)
+  private float str2float(string s)
   {
-    string[] csvLine;
-    List<string[]> csvLines = new List<string[]>();
-
+    return  float.Parse(s, System.Globalization.NumberStyles.Float);
+  }
+  List<float[]> ReadCsv(string text)
+  {
+    string[] csvLineString;
+    List<float[]> csvLines = new List<float[]>();
     string[] textLines = text.Split('\n');
     for (int i=0;i<textLines.Length;i++)
     {
-      csvLine = textLines[i].Split();
-      csvLines.Add(csvLine);
-      //Debug.Log(csvLine);
+      if (!string.IsNullOrWhiteSpace(textLines[i])){
+        csvLineString = textLines[i].Trim().Split(',');
+        float[] csvLine = csvLineString.Select(str2float).ToArray();
+        csvLines.Add(csvLine);
+      }
     }
-    for (int i=0;i<csvLines.Count;i++){
-      Debug.Log(csvLines[i]);
-    }
-    return csvLines;
-    
+    return csvLines;    
   }
 
 }
