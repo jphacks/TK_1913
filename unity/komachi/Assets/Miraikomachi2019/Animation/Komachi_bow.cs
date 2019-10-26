@@ -23,6 +23,9 @@ public class Komachi_bow : MonoBehaviour
   HumanPose miraiPose;
   HumanPoseHandler handler;
   AngleControl angleControlScript;
+
+  string csvText;
+  List<string[]> csvLines;
   enum Muscles : int
   {
     SpineFrontBack,
@@ -158,7 +161,8 @@ public class Komachi_bow : MonoBehaviour
     m_ClipName = m_CurrentClipInfo[0].clip.name;
     //print(m_CurrentClipLength);
     timer = (1 / m_CurrentClipLength) / 60;
-    StartCoroutine(GetText("http://example.com"));
+    StartCoroutine(GetText("https://www.e-stat.go.jp/stat-search/file-download?statInfId=000031524010&fileKind=1"));
+    ReadCsv(csvText);
   }
 
   // Update is called once per frame
@@ -273,10 +277,30 @@ public class Komachi_bow : MonoBehaviour
       }
       else
       {
+        csvText = www.downloadHandler.text;
         // Show results as text
-        Debug.Log(www.downloadHandler.text);
+        Debug.Log(csvText);
       }
     }
+  }
+
+  List<string[]> ReadCsv(string text)
+  {
+    string[] csvLine;
+    List<string[]> csvLines = new List<string[]>();
+
+    string[] textLines = text.Split('\n');
+    for (int i=0;i<textLines.Length;i++)
+    {
+      csvLine = textLines[i].Split();
+      csvLines.Add(csvLine);
+      //Debug.Log(csvLine);
+    }
+    for (int i=0;i<csvLines.Count;i++){
+      Debug.Log(csvLines[i]);
+    }
+    return csvLines;
+    
   }
 
 }
