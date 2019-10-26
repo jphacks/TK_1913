@@ -2,7 +2,6 @@ from time import sleep
 from datetime import datetime
 import bluetooth
 import json
-from collections import deque
 import requests
 import threading
 # import RPi.GPIO as GPIO
@@ -16,7 +15,7 @@ MY_ADDR = 'B8:27:EB:56:A1:68'
 
 
 def connect_with_neck():
-    global queue
+    global data_list
     global bow_flag
     global bow_id
     dps310 = DPS310()
@@ -44,8 +43,7 @@ def connect_with_neck():
                             "pressure2": p_waist,
                             "mac_address": "b8:27:eb:a9:5e:97",
                         }
-                        json_data = json.dumps(data)
-                        queue.append(json_data)
+                        data_list.append(data)
                     sleep(0.1)
                 except bluetooth.btcommon.BluetoothError:
                     break
@@ -68,12 +66,11 @@ def gpio():
         sleep(20)
 
 def post_json():
-    global queue
+    global data_list
     global bow_flag
-    queue.clear()
     while True:
-        if len(queue) > 0:
-            json_data = queue.popleft()
+        if len(data_list) > 0:
+            json_data, data_list = json.dumps(data_list), []
             print(json_data)
             try:
                 print("start")
@@ -87,7 +84,7 @@ def post_json():
         sleep(0.1)
 
 if __name__ == '__main__':
-    queue = deque()
+    data_list = []
     bow_flag = False
     bow_id = 0
     thread_1 = threading.Thread(target=connect_with_neck)
