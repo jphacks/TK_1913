@@ -20,6 +20,8 @@ def connect_with_neck():
     global data_list
     global bow_flag
     global start_flag
+    global calibration_flag
+    global offset_p
     dps310 = DPS310()
 
     bt_server = BTServer(PORT)
@@ -36,6 +38,12 @@ def connect_with_neck():
 
                     recv_data = bt_server.recv(RECV_SIZE).decode()
                     p_neck = float(recv_data.split('p')[-1])
+
+                    if calibration_flag:
+                        offset_p = p_neck - p_waist
+                        calibration_flag = False
+                    p_waist += offset_p
+
                     if bow_flag:
                         timestamp = datetime.today().timestamp()
                         if start_flag:
@@ -65,6 +73,7 @@ def connect_with_neck():
 def gpio():
     global bow_flag
     global start_flag
+    global calibration_flag
     while True:
         try:
             GPIO.wait_for_edge(PIN, GPIO.FALLING)
@@ -73,6 +82,7 @@ def gpio():
                 bow_flag = True
                 start_flag = True
             else:
+                calibration_flag = True
                 print('Calibration')
 
         except Exception as e:
@@ -101,6 +111,8 @@ if __name__ == '__main__':
     data_list = []
     bow_flag = False
     start_flag = False
+    calibration_flag = False
+    offset_p = 0
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     thread_1 = threading.Thread(target=connect_with_neck)
