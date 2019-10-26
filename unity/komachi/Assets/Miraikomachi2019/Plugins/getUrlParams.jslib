@@ -4,13 +4,13 @@ mergeInto(LibraryManager.library, {
     return searchParams.getAll();
   },
 
-  TestJs2: function(data) {
+  GiveJs2Unity: function(data) {
     console.log("TestJs2");
+    console.log("data: " + data);
     return data;
   },
 
-  TestJs: function() {
-    console.log("hoge");
+  InitWS: function() {
     var ws = new WebSocket("ws://localhost:3001");
     console.log(ws);
     ws.onopen = function(event) {
@@ -22,8 +22,8 @@ mergeInto(LibraryManager.library, {
     };
 
     ws.onmessage = function(event) {
-      console.log("msg: " + event);
-      _TestJs2(event);
+      console.log("msg: " + event.data);
+      _GiveJs2Unity(parseFloat(event.data));
     };
   },
 

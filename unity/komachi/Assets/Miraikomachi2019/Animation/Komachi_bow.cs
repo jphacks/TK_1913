@@ -12,9 +12,9 @@ public class Komachi_bow : MonoBehaviour
   // private static extern string InjectionJs(string url, string id);
   // [DllImport("__Internal")]
   [DllImport("__Internal")]
-  public static extern string TestJs();
+  public static extern float GiveJs2Unity();
   [DllImport("__Internal")]
-  public static extern string TestJs2();
+  public static extern float InitWS();
   [DllImport("__Internal")]
   public static extern string ReadAnimationValue();
   // #endif
@@ -132,6 +132,8 @@ public class Komachi_bow : MonoBehaviour
   [SerializeField]
   private float huga = 0;
 
+  float getData;
+
 
   // Use this for initialization
   void Start()
@@ -158,7 +160,14 @@ public class Komachi_bow : MonoBehaviour
     m_ClipName = m_CurrentClipInfo[0].clip.name;
     //print(m_CurrentClipLength);
     timer = (1 / m_CurrentClipLength) / 60;
-    // StartCoroutine(GetText("http://example.com"));
+    StartCoroutine(GetText("http://example.com"));
+
+    getData = TestJsInCs();
+  }
+
+  private float TestJsInCs()
+  {
+    return InitWS();
   }
 
   // Update is called once per frame
@@ -166,17 +175,17 @@ public class Komachi_bow : MonoBehaviour
   {
     // musclesStatus ();
     // getSliderValue();
-    moveAnimationBySlider();
+    // moveAnimationBySlider();
     // string rcv_data = TestJsInCs();
     // string rcv_data = ReadAnimationValue();
-    // moveAnimationByText(rcv_data);
+    moveAnimationByText(getData);
   }
 
-  private void moveAnimationByText(string data)
+  private void moveAnimationByText(float data)
   {
     handler.SetHumanPose(ref miraiPose);
     // anim.Play("Komachi_bow_3", 0, 0.147f + 0.343f * huga);
-    anim.Play("Komachi_bow_3", 0, 0.147f + 0.343f * float.Parse(data));
+    anim.Play("Komachi_bow_3", 0, data);
     // huga += timer;
   }
 
@@ -184,7 +193,7 @@ public class Komachi_bow : MonoBehaviour
   {
     float sliderValue = angleControlScript.getAngleSliderNormalizedValue() * 90 / 146;
     handler.SetHumanPose(ref miraiPose);
-    anim.Play("Komachi_bow", 0, sliderValue);
+    anim.Play("Komachi_bow_3", 0, sliderValue);
     // sliderValue += timer;
   }
 
@@ -254,11 +263,6 @@ public class Komachi_bow : MonoBehaviour
 
     float rot = 130 * (0.0f + 0.3f * sliderValue);
     miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
-  }
-
-  private string TestJsInCs()
-  {
-    return TestJs();
   }
 
   IEnumerator GetText(string url)
