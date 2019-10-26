@@ -1,6 +1,7 @@
 from database import init_db
 from database import db
 from flask import Flask, request, send_file, abort, render_template
+from flask_mqtt import Mqtt
 import json
 from models import Bow
 import os
@@ -11,7 +12,33 @@ import glob
 
 app = Flask(__name__)
 app.config.from_object('config.Development')
+mqtt = Mqtt(app)
 init_db(app)
+
+# subscribe topic
+mqtt.subscribe(app.config['MQTT_TOPIC'])
+
+def get_filename(data):
+    return f'data/{data["mac_address"]}{data["timestamp"]}.csv'
+
+def format_data(data):
+    return f'{data["time"]},{data["pressure1"]},{data["pressure2"]}'
+
+@mqtt.on_message()
+def handle_mqtt_message(client, userdata, message):
+    payload = message.payload.decode()
+    data = json.loads(payload)
+    formated = format_data(data)
+    
+    with open(get_filename(data), "a") as f:
+        f.write(f'{formated}\n')
+    
+    global last_data
+    last_data = formated
+
+@mqtt.on_log()
+def handle_logging(client, userdata, level, buf):
+    print(level, buf)
 
 @app.route("/")
 def index():
@@ -21,13 +48,14 @@ def index():
 def bow():
     global last_data
     data_list = json.loads(request.get_json())
+    
     for data in data_list:
-        fname = f'data/{data["mac_address"]}{data["timestamp"]}.csv'
-        with open(fname, 'a') as f:
-            f.write("{},{},{}\n".format(data["time"], data["pressure1"], data["pressure2"]))
-            f.close()
-        last_data = f'{data["time"]},{data["pressure1"]},{data["pressure2"]}'
-    return f'file_name:  {data["mac_address"]}{data["timestamp"]}\n'
+        formated = format_data(data)
+        last_data = formated
+        with open(get_filename(data), 'a') as f:
+            f.write(f'{formated}\n')
+    
+    return ('', 200)
 
 @app.route("/regsiter", methods = ['GET'])
 def normalization():
