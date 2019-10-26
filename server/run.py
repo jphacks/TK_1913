@@ -42,7 +42,15 @@ def handle_logging(client, userdata, level, buf):
 
 @app.route("/")
 def index():
-    return "Hello"
+    path = "./data"
+    bow_names = []
+    bow_data = []
+    for x in glob.glob(os.path.join(path, '*.csv')):
+        tmp = os.path.relpath(x, path)
+        bow_names.append(tmp)
+        with open("./data/" + tmp, 'r') as f:
+            bow_data = list(csv.reader(f))
+    return render_template("bows.html", message1 = bow_names, message2 = bow_data)
 
 @app.route("/bow", methods = ['POST'])
 def bow():
@@ -79,18 +87,6 @@ def get_csv():
 def get_last_data():
     global last_data
     return last_data
-
-@app.route("/bows")
-def bows():
-    path = "./data"
-    bow_names = []
-    bow_data = []
-    for x in glob.glob(os.path.join(path, '*.csv')):
-        tmp = os.path.relpath(x, path)
-        bow_names.append(tmp)
-        with open("./data/" + tmp, 'r') as f:
-            bow_data = list(csv.reader(f))
-    return render_template("bows.html", message1 = bow_names, message2 = bow_data)
 
 @app.route("/unity")
 def unity():
