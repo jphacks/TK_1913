@@ -3,6 +3,7 @@ from database import init_db
 from database import db
 
 app = Flask(__name__)
+app.config.from_object("config.Development")
 init_db(app)
 
 @app.route("/")
