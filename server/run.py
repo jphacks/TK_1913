@@ -1,12 +1,13 @@
 from database import init_db
 from database import db
-from flask import Flask, request, send_file, abort
+from flask import Flask, request, send_file, abort, render_template
 import json
 from models import Bow
 import os
 import math
 import csv
 import normalize
+import glob
 
 app = Flask(__name__)
 app.config.from_object('config.Development')
@@ -44,6 +45,19 @@ def get_csv():
 def get_last_data():
     global last_data
     return last_data
+
+@app.route("/bows")
+def bows():
+    path = "./data"
+    bow_names = []
+    bow_data = []
+    for x in glob.glob(os.path.join(path, '*.csv')):
+        tmp = os.path.relpath(x, path)
+        bow_names.append(tmp)
+        with open("./data/" + tmp, 'r') as f:
+            bow_data = list(csv.reader(f))
+    print(bow_names)
+    return render_template("index.html", message1 = bow_names, message2 = bow_data)
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 80)
