@@ -62,11 +62,11 @@ def bows():
         bow_names.append(tmp)
         with open("./data/" + tmp, 'r') as f:
             bow_data = list(csv.reader(f))
-    return render_template("index.html", message1 = bow_names, message2 = bow_data)
+    return render_template("bows.html", message1 = bow_names, message2 = bow_data)
 
 @app.route("/unity")
 def unity():
-    return "HElloooo"
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 80)

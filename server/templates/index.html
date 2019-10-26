@@ -1,14 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Miraikomachi2019</title>
+    <link rel="shortcut icon" href="{{url_for('static', filename = 'TemplateData/favicon.ico')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename = 'TemplateData/style.css')}}">
+    <script src="{{url_for('static', filename = 'TemplateData/UnityProgress.js')}}"></script>  
+    <script src="{{url_for('static', filename = 'Build/UnityLoader.js')}}"></script>
+    <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "{{url_for('static', filename = 'Build/builds.json')}}", {onProgress: UnityProgress});
+    </script>
   </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <h3 class="text-muted">Bows</h3>
-          <ul>{% for item in message1 %}
-          <li><a href="/unity?file={{item}}">{{item}}</a></li>
-          {% endfor %}<ul>
+    <div class="webgl-content">
+      <div id="gameContainer" style="width: 960px; height: 600px"></div>
+      <div class="footer">
+        <div class="webgl-logo"></div>
+        <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+        <div class="title">Miraikomachi2019</div>
       </div>
     </div>
   </body>
