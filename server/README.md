@@ -93,3 +93,37 @@ FLASK_APP=run.py flask run
 ### Output
 - 何も返さない
   - 現状ではデバッグのためタイムスタンプを返すようになっている
+
+## GET: /last_data
+- 最新のデータを取得
+### Process
+- last_data（変数）に以下のフォーマットで保存されているstrデータを取得
+### Output
+- 以下のフォーマットの文字列
+```
+time,pressure1,pressure2
+# 1572022431,999,995
+```
+
+## GET: /csv
+- bow_dataに保存されているcsvファイルを取得
+### QUERY
+- 以下のフォーマットで取得したいファイル名を指定する
+```
+file_name="ファイル名"（.csvは書かない）
+```
+### Process
+- file_nameで指定されたcsvファイルが/bowディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
+- 存在していなければ、400bad requestを返す
+### Output
+- ファイル名
+```
+"{}{}.csv".format(mac_address, timestamp)
+# 1572022431ff:ff:ff:ff:ff:ff.csv
+```
+- ファイルの中身
+```
+time,pressure1,pressure2
+# 1572022431,999,995
+# 1583142413,1000,994
+```
