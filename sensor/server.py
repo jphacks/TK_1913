@@ -5,7 +5,6 @@ import json
 from collections import deque
 import requests
 import threading
-import sys
 # import RPi.GPIO as GPIO
 from dps310 import DPS310
 from btxmt import BTServer
