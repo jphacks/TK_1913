@@ -158,7 +158,7 @@ public class Komachi_bow : MonoBehaviour
     m_ClipName = m_CurrentClipInfo[0].clip.name;
     //print(m_CurrentClipLength);
     timer = (1 / m_CurrentClipLength) / 60;
-    // StartCoroutine(GetText("http://example.com"));
+    StartCoroutine(GetText("http://example.com"));
   }
 
   // Update is called once per frame
@@ -263,9 +263,9 @@ public class Komachi_bow : MonoBehaviour
 
   IEnumerator GetText(string url)
   {
-    using (UnityWebRequest www = UnityWebRequest.Get("http://example.com"))
+    using (UnityWebRequest www = UnityWebRequest.Get(url))
     {
-      yield return www.Send();
+      yield return www.SendWebRequest();
 
       if (www.isNetworkError || www.isHttpError)
       {
