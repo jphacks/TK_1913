@@ -3,3 +3,4 @@ SQLAlchemy
 flask-sqlalchemy
 PyMySQL
 mysqlclient
+flask-mqtt
