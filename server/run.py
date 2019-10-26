@@ -6,6 +6,7 @@ from models import Bow
 import os
 import math
 import csv
+import normalize
 
 app = Flask(__name__)
 app.config.from_object('config.Development')
