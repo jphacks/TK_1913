@@ -28,8 +28,8 @@ def bow():
         last_data = f'{data["time"]},{data["pressure1"]},{data["pressure2"]}'
     return f'file_name:  {data["mac_address"]}{data["timestamp"]}\n'
 
-@app.route("/end", methods = ['GET'])
-def end():
+@app.route("/regsiter", methods = ['GET'])
+def normalization():
     fname = f'data/{request.args.get("mac_address")}{request.args.get("timestamp")}.csv'
     normalize.normalize(fname)
     return "Success normalization!"
