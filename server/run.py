@@ -28,12 +28,18 @@ def bow():
         last_data = f'{data["time"]},{data["pressure1"]},{data["pressure2"]}'
     return f'file_name:  {data["mac_address"]}{data["timestamp"]}\n'
 
+@app.route("/regsiter", methods = ['GET'])
+def normalization():
+    fname = f'data/{request.args.get("mac_address")}{request.args.get("timestamp")}.csv'
+    normalize.normalize(fname)
+    return "Success normalization!"
+
 @app.route("/csv", methods = ['GET'])
 def get_csv():
     fname = request.args.get('file_name') + '.csv'
-    files = os.listdir("bow_data")
+    files = os.listdir("normalized_data")
     if fname in files:
-        return send_file('data/' + fname,
+        return send_file('normalized_data/' + fname,
                 mimetype='text/csv',
                 attachment_filename='data/' + fname,
                 as_attachment=True)
