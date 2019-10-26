@@ -70,7 +70,7 @@ FLASK_APP=run.py flask run
 - なし
 
 ## POST: /bow
-- jsonを受け取り，それをそのままtimestampとmac_addressで一意に特定されるファイルに追記していく
+- jsonを受け取り，（/bow_dataのディレクトリ内に）それをそのままtimestampとmac_addressで一意に特定されるファイルに追記していく
 ### Input
 - 以下のフォーマットのjson形式のデータが `POST` で `Content-Type: application/json` で送られてくることを期待
 ```
@@ -106,14 +106,14 @@ time,pressure1,pressure2
 ```
 
 ## GET: /csv
-- bow_dataに保存されているcsvファイルを取得
+- bow_data（ディレクトリ）に保存されているcsvファイルを取得
 ### QUERY
 - 以下のフォーマットで取得したいファイル名を指定する
 ```
 file_name="ファイル名"（.csvは書かない）
 ```
 ### Process
-- file_nameで指定されたcsvファイルが/bowディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
+- file_nameで指定されたcsvファイルが/bow_dataディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
 - 存在していなければ、400bad requestを返す
 ### Output
 - ファイル名
