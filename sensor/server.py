@@ -44,6 +44,7 @@ def connect_with_neck():
                     if calibration_flag:
                         offset_p = p_neck - p_waist
                         calibration_flag = False
+                        print(f'neck:{p_neck},waist:{p_waist},offset:{offset_p}')
                     p_waist += offset_p
 
                     if bow_flag:
@@ -57,7 +58,7 @@ def connect_with_neck():
                                 bow_flag = False
                                 try:
                                     response = requests.get(f'{URL}/register?timestamp={bow_id}&mac_address={WF_ADDR}')
-                                    print(response)
+                                    # print(response)
                                 except KeyboardInterrupt:
                                     break
                                 except Exception as e:
@@ -92,11 +93,9 @@ def gpio():
                 start_flag = True
             else:
                 calibration_flag = True
-                print('Calibration')
 
         except Exception as e:
             print(e)
-            print("gpio")
 
 def post_json():
     global data_list
@@ -104,12 +103,9 @@ def post_json():
     while True:
         if len(data_list) > 0:
             json_data, data_list = json.dumps(data_list), []
-            print(json_data)
             try:
-                print("start")
                 response = requests.post(f'{URL}/bow', json=json_data)
-                print(response)
-                print("finish")
+                # print(response)
             except KeyboardInterrupt:
                 break
             except Exception as e:
