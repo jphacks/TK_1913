@@ -11,10 +11,12 @@ from btxmt import BTServer
 
 PORT = 1
 RECV_SIZE = 1024
-MY_ADDR = 'B8:27:EB:56:A1:68'
+WF_ADDR = 'b8:27:eb:a9:5e:97'
 
 PIN = 21
 TIMEOUT = 3000 # mill sec
+
+URL = 'http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com'
 
 def connect_with_neck():
     global data_list
@@ -53,12 +55,19 @@ def connect_with_neck():
                         else:
                             if timestamp - bow_id > 2 and p_neck < standard_p_neck + 0.1:
                                 bow_flag = False
+                                try:
+                                    response = requests.get(f'{URL}/register?timestamp={bow_id}&mac_address={WF_ADDR}')
+                                    print(response)
+                                except KeyboardInterrupt:
+                                    break
+                                except Exception as e:
+                                    print(e)
                         data = {
                             "timestamp": bow_id,
                             "time": timestamp,
                             "pressure1": p_neck,
                             "pressure2": p_waist,
-                            "mac_address": "b8:27:eb:a9:5e:97",
+                            "mac_address": WF_ADDR,
                         }
                         data_list.append(data)
                     sleep(0.1)
@@ -98,7 +107,7 @@ def post_json():
             print(json_data)
             try:
                 print("start")
-                response = requests.post('http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com/bow', json=json_data)
+                response = requests.post(f'{URL}/bow', json=json_data)
                 print(response)
                 print("finish")
             except KeyboardInterrupt:
