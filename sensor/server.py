@@ -54,7 +54,9 @@ def connect_with_neck():
                             standard_p_neck = p_neck
                             start_flag = False
                         else:
-                            if timestamp - bow_id > 2 and p_neck < standard_p_neck + 0.1:
+                            if (timestamp - bow_id > 2 and
+                                p_neck < standard_p_neck + 0.5):
+                                # + 0.5 [Pa] は 4.5-5 cm 程度のズレを許容する項
                                 bow_flag = False
                                 try:
                                     response = requests.get(f'{URL}/register?timestamp={bow_id}&mac_address={WF_ADDR}')
