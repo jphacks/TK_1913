@@ -11,10 +11,10 @@ public class Komachi_bow : MonoBehaviour
   // [DllImport("__Internal")]
   // private static extern string InjectionJs(string url, string id);
   // [DllImport("__Internal")]
-  [DllImport("__Internal")]
-  public static extern string TestJs();
-  [DllImport("__Internal")]
-  public static extern string TestJs2();
+  // [DllImport("__Internal")]
+  // public static extern string TestJs();
+  // [DllImport("__Internal")]
+  // public static extern string TestJs2();
   // [DllImport("__Internal")]
   // public static extern string ReadAnimationValue();
   [DllImport("__Internal")]
@@ -178,7 +178,7 @@ public class Komachi_bow : MonoBehaviour
   {
     // musclesStatus();
     // getSliderValue();
-    // moveAnimationBySlider();
+    // rotateAnimationBySlider();
     // string rcv_data = TestJsInCs();
     // string rcv_data = ReadAnimationValue();
     // moveAnimationByText(rcv_data);
@@ -293,10 +293,17 @@ public class Komachi_bow : MonoBehaviour
     miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
   }
 
-  private string TestJsInCs()
+  private void rotateAnimationBySlider()
   {
-    return TestJs();
+    float sliderValue = angleControlScript.getAngleSliderNormalizedValue();
+    float rot = 360 * sliderValue;
+    miraiAnimator.transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
   }
+
+  // private string TestJsInCs()
+  // {
+  //   return TestJs();
+  // }
 
   IEnumerator GetText(string url)
   {

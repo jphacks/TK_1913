@@ -769,7 +769,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slider: {fileID: 0}
   huga: 1
-  valueFromMqtt: 
+  valueFromMqtt: 0
 --- !u!1 &934392151
 GameObject:
   m_ObjectHideFlags: 0
@@ -1201,7 +1201,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2129125078
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1217,7 +1217,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -264, y: 0}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2129125079
@@ -1226,11 +1226,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2129125077}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e93eb17a05a5c84487f3755f24dcf56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  komachi_bow: {fileID: 0}
   txt: {fileID: 2129125080}
 --- !u!114 &2129125080
 MonoBehaviour:
@@ -1238,7 +1239,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2129125077}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 

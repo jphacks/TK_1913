@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="TemplateData/style.css" />
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="Build/UnityLoader.js"></script>
+    <!-- <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/biulds3.json", {onProgress: UnityProgress});
+    </script> -->
   </head>
   <body>
     <div class="webgl-content">
@@ -24,12 +27,12 @@
       <script>
         var gameInstance = UnityLoader.instantiate(
           "gameContainer",
-          "Build/biulds2.json",
+          "Build/biulds3.json",
           { onProgress: UnityProgress }
         );
         var hostname = "komachi.hongo.ad.jp";
         var port = 15675;
-        var clientId = "12345";
+        var clientId = "123456";
         var client = new Paho.MQTT.Client(hostname, port, clientId);
 
         var topic = "foo/bar";
@@ -83,6 +86,7 @@
           };
         }
         document.getElementById("test-input").addEventListener("click", () => {
+          console.log("=== mqtt start ===");
           main();
         });
       </script>
