@@ -5,6 +5,8 @@ import json
 import requests
 import threading
 import RPi.GPIO as GPIO
+import paho.mqtt.client as mqtt
+from collections import deque
 from dps310 import DPS310
 from btxmt import BTServer
 
@@ -16,7 +18,10 @@ WF_ADDR = 'b8:27:eb:a9:5e:97'
 PIN = 21
 TIMEOUT = 3000 # milli sec
 
-URL = 'http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com'
+URL = 'http://komachi.hongo.wide.ad.jp'
+
+MQTT_HOST = 'komachi.hongo.wide.ad.jp'
+MQTT_PORT = 1883
 
 def connect_with_neck():
     global data_list
@@ -24,6 +29,9 @@ def connect_with_neck():
     global start_flag
     global calibration_flag
     global offset_p
+    global prev_p_neck
+    global bow_id_queue
+    global end_flag
     dps310 = DPS310()
 
     bt_server = BTServer(PORT)
@@ -44,27 +52,22 @@ def connect_with_neck():
                     if calibration_flag:
                         offset_p = p_neck - p_waist
                         calibration_flag = False
-                        print(f'Neck: {p_neck}, Waist: {p_waist}, Offset:{offset_p}')
+                        print(f'neck:{p_neck},waist:{p_waist},offset:{offset_p}')
                     p_waist += offset_p
-
+                    
+                    timestamp = datetime.today().timestamp()
                     if bow_flag:
-                        timestamp = datetime.today().timestamp()
                         if start_flag:
                             bow_id = timestamp
+                            bow_id_queue.append(bow_id)
                             standard_p_neck = p_neck
                             start_flag = False
                         else:
                             if (timestamp - bow_id > 2 and
                                 p_neck < standard_p_neck + 0.5):
-                                # + 0.5 [Pa] は 4.5-5 cm 程度のズレを許容する項
                                 bow_flag = False
-                                try:
-                                    response = requests.get(f'{URL}/register?timestamp={bow_id}&mac_address={WF_ADDR}')
-                                    # print(response)
-                                except KeyboardInterrupt:
-                                    break
-                                except Exception as e:
-                                    print(e)
+                                end_flag = True
+
                         data = {
                             "timestamp": bow_id,
                             "time": timestamp,
@@ -72,7 +75,23 @@ def connect_with_neck():
                             "pressure2": p_waist,
                             "mac_address": WF_ADDR,
                         }
+                        json_data = json.dumps(data)
+                        client.publish('bow/bow', json_data)
                         data_list.append(data)
+                        print(f'Neck: {p_neck}, Waist: {p_waist}')
+                        v = p_neck - prev_p_neck
+                        prev_p_neck = p_neck
+                        print(v)
+                    else:
+                        data = {
+                            "timestamp": timestamp,
+                            "time": timestamp,
+                            "pressure1": p_neck,
+                            "pressure2": p_waist,
+                            "mac_address": WF_ADDR,
+                        }
+                        json_data = json.dumps(data)
+                        client.publish('bow', json_data)
                     sleep(0.1)
                 except bluetooth.btcommon.BluetoothError:
                     break
@@ -104,27 +123,59 @@ def post_json():
     global bow_flag
     while True:
         if len(data_list) > 0:
-            json_data, data_list = json.dumps(data_list), []
+            data_list = []
+        sleep(0.1)
+
+def get():
+    global end_flag
+    global data_list
+    global bow_id_queue
+    while True:
+        sleep(1)
+        if len(data_list) > 0:
+            if data_list[0]["timestamp"] != bow_id_queue[0]:
+                get_bow_id = bow_id_queue.popleft()
+                try:
+                    response = requests.get(f'{URL}/register?timestamp={get_bow_id}&mac_address={WF_ADDR}')
+                    print(response)
+                except KeyboardInterrupt:
+                    break
+                except Exception as e:
+                    # print(e)
+                    pass
+                end_flag = False
+        if end_flag and len(data_list) == 0:
+            end_flag = False
+            get_bow_id = bow_id_queue.popleft()
+            print(get_bow_id)
             try:
-                response = requests.post(f'{URL}/bow', json=json_data)
-                # print(response)
+                response = requests.get(f'{URL}/register?timestamp={get_bow_id}&mac_address={WF_ADDR}')
+                print(response)
             except KeyboardInterrupt:
                 break
             except Exception as e:
-                print(e)
-        sleep(0.1)
+                # print(e)
+                pass
+
 
 if __name__ == '__main__':
     data_list = []
     bow_flag = False
     start_flag = False
+    end_flag = False
     calibration_flag = False
     offset_p = 0
+    prev_p_neck = 0
+    bow_id_queue = deque()
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    client = mqtt.Client(protocol=mqtt.MQTTv311)
+    client.connect(MQTT_HOST, port=MQTT_PORT, keepalive=60)
     thread_1 = threading.Thread(target=connect_with_neck)
     thread_2 = threading.Thread(target=gpio)
     thread_3 = threading.Thread(target=post_json)
+    thread_4 = threading.Thread(target=get)
     thread_1.start()
     thread_2.start()
     thread_3.start()
+    thread_4.start()
