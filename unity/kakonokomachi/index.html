@@ -8,9 +8,6 @@
     <link rel="stylesheet" href="TemplateData/style.css">
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="Build/UnityLoader.js"></script>
-    <script>
-      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/web.json", {onProgress: UnityProgress});
-    </script>
   </head>
   <body>
     <div class="webgl-content">
@@ -21,7 +18,7 @@
         <div class="title">komachi</div>
       </div>
       <script>
-        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/web.json", {onProgress: UnityProgress});
+        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/web3.json", {onProgress: UnityProgress});
         var searchParams = new URLSearchParams(location.search);
         var bow_id = searchParams.get("bow_id");
         gameInstance.SendMessage("mirai2019_dance", "GetBowId", bow_id);

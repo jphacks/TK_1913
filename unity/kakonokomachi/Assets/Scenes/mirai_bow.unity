@@ -781,10 +781,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c211d7f935cd95469f513dc84e71a53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  csvText: 
   slider: {fileID: 0}
-  huga: 1
   t: 0
+  startTime: 0
   lineNum: 0
+  firstTime: 1
+  bow_id: 
 --- !u!1 &934392151
 GameObject:
   m_ObjectHideFlags: 0
