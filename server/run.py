@@ -1,6 +1,7 @@
 from database import init_db
 from database import db
 from flask import Flask, request, send_file, abort, render_template
+from flask_bootstrap import Bootstrap
 from flask_mqtt import Mqtt
 import json
 from models import Bow
@@ -13,6 +14,7 @@ import glob
 app = Flask(__name__)
 app.config.from_object('config.Development')
 mqtt = Mqtt(app)
+bootstrap = Bootstrap(app)
 init_db(app)
 
 # subscribe topic
@@ -98,7 +100,7 @@ def get_last_data():
     global last_data
     return last_data
 
-@app.route("/unity")
+@app.route("/kakonokomachi")
 def unity():
     return render_template("index.html")
 

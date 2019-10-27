@@ -4,3 +4,4 @@ flask-sqlalchemy
 PyMySQL
 mysqlclient
 flask-mqtt
+flask-bootstrap

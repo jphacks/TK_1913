@@ -1,17 +1,17 @@
-<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <h3 class="text-muted">Bows</h3>
-          <ul>
-            {% for bow in bows %}
-              <li><a href="/unity?bow_id={{bow[0]}}">{{ bow[1]}} </a></li>
-            {% endfor %}
-          <ul>
-      </div>
+{% extends "bootstrap/base.html" %}
+
+{% block title %} 日本文化×Tech {% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="header">
+      <h3 class="text-muted">カコノコマチ</h3>
     </div>
-  </body>
-</html>
+    <div class="container my-lg-2">
+        <div class="list-group">
+          {% for bow in bows %}
+            <a href="/kakonokomachi?bow_id={{bow[0]}}" class="list-group-item col-3">{{bow[0]}}: {{ bow[1]}} </a>
+          {% endfor %}
+        </div>
+      </div>
+  </div>
+{% endblock %}
