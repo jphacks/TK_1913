@@ -29,7 +29,7 @@ public class Komachi_bow : MonoBehaviour
   AngleControl angleControlScript;
 
   private string csvText;
-  private List<float[]> csvLines;
+  private List<double[]> csvLines;
   enum Muscles : int
   {
     SpineFrontBack,
@@ -138,8 +138,8 @@ public class Komachi_bow : MonoBehaviour
   float timer;
   [SerializeField]
   private float huga = 0;
-  public float t;
-  private float startTime;
+  public double t;
+  private double startTime;
   public int lineNum;
 
 
@@ -168,7 +168,7 @@ public class Komachi_bow : MonoBehaviour
     //m_ClipName = m_CurrentClipInfo[0].clip.name;
     //print(m_CurrentClipLength);
     //timer = (1 / m_CurrentClipLength) / 60;
-    csvText = GetText("http://localhost:8000/a.txt");
+    csvText = GetText("http://localhost:8000/a.csv");
     //Debug.Log(csvText);
     csvLines = ReadCsv(csvText);
     startTime = csvLines[0][0];
@@ -258,17 +258,17 @@ public class Komachi_bow : MonoBehaviour
     }
   }
 
-private void getPoseFromCsv(List<float[]> csvLines, float startTime)
+private void getPoseFromCsv(List<double[]> csvLines, double startTime)
   {
     Debug.Log(t);
     for (int i=lineNum;i<csvLines.Count-1;i++){
       if (csvLines[i][0]-startTime <= t && t < csvLines[i+1][0]-startTime)
       {
-        Debug.Log((t-csvLines[i][0]));
-        float ratio = (t-csvLines[i][0]+startTime)/(csvLines[i+1][0]-csvLines[i][0]);
-        Debug.Log(ratio);
-        float sliderValue = linear(csvLines[i][1], csvLines[i+1][1], ratio);
-        Debug.Log(sliderValue);
+        //Debug.Log((t-csvLines[i][0]));
+        double ratio = (t-csvLines[i][0]+startTime)/(csvLines[i+1][0]-csvLines[i][0]);
+        //Debug.Log(ratio);
+        float sliderValue = float.Parse(linearDouble(csvLines[i][1], csvLines[i+1][1], ratio).ToString());
+        //Debug.Log(sliderValue);
         // [parameters of bow_3]
         // 21 Left  Upper Leg Front-Back  :  [0.5 ~ -0.5]
         // 29 Right Upper Leg Front-Back  :  [0.5 ~ -0.5]
@@ -305,6 +305,10 @@ private void getPoseFromCsv(List<float[]> csvLines, float startTime)
     miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
   }
 
+  private double linearDouble(double min, double max, double ratio)
+  {
+    return (1-ratio)*min + ratio*max;
+  }
   private float linear(float min, float max, float ratio)
   {
     return (1-ratio)*min + ratio*max;
@@ -358,21 +362,22 @@ private void getPoseFromCsv(List<float[]> csvLines, float startTime)
 
   }
 
-  private float str2float(string s)
+  private double str2float(string s)
   {
-    return  float.Parse(s, System.Globalization.NumberStyles.Float);
+    return  double.Parse(s, System.Globalization.NumberStyles.Float);
   }
-  List<float[]> ReadCsv(string text)
+  List<double[]> ReadCsv(string text)
   {
     string[] csvLineString;
-    List<float[]> csvLines = new List<float[]>();
+    List<double[]> csvLines = new List<double[]>();
     string[] textLines = text.Split('\n');
     for (int i=0;i<textLines.Length;i++)
     {
       if (!string.IsNullOrWhiteSpace(textLines[i])){
         csvLineString = textLines[i].Trim().Split(',');
-        float[] csvLine = csvLineString.Select(str2float).ToArray();
+        double[] csvLine = csvLineString.Select(str2float).ToArray();
         csvLines.Add(csvLine);
+        Debug.Log(csvLine[0]);
       }
     }
     return csvLines;    
