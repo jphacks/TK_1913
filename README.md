@@ -4,6 +4,8 @@
 
 ![kakono_komachi_logo](https://user-images.githubusercontent.com/38515249/67630144-23d6bf00-f8c6-11e9-9561-fe12a8e70943.png)
 
+Movie: <https://youtu.be/xtJs3lalMsQ>
+
 ## 製品概要
 
 ### 日本文化 × Tech
