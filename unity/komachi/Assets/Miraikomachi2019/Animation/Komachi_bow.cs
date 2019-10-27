@@ -15,8 +15,10 @@ public class Komachi_bow : MonoBehaviour
   public static extern string TestJs();
   [DllImport("__Internal")]
   public static extern string TestJs2();
+  // [DllImport("__Internal")]
+  // public static extern string ReadAnimationValue();
   [DllImport("__Internal")]
-  public static extern string ReadAnimationValue();
+  public static extern void OutputConsole(string str);
   // #endif
   GameObject mirai, angleSlider;
   Animator miraiAnimator;
@@ -131,6 +133,7 @@ public class Komachi_bow : MonoBehaviour
   float timer;
   [SerializeField]
   private float huga = 0;
+  public float valueFromMqtt = 0;
 
 
   // Use this for initialization
@@ -144,39 +147,66 @@ public class Komachi_bow : MonoBehaviour
     initUpRightPose();
     //musclesStatus();
 
+    valueFromMqtt = 0.5f;
+
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
 
-    anim = GetComponent<Animator>();
-    //Get them_Animator, which you attach to the GameObject you intend to animate.
-    m_Animator = gameObject.GetComponent<Animator>();
-    //Fetch the current Animation clip information for the base layer
-    m_CurrentClipInfo = this.m_Animator.GetCurrentAnimatorClipInfo(0);
-    //Access the current length of the clip
-    m_CurrentClipLength = m_CurrentClipInfo[0].clip.length;
-    //Access the Animation clip name
-    m_ClipName = m_CurrentClipInfo[0].clip.name;
-    //print(m_CurrentClipLength);
-    timer = (1 / m_CurrentClipLength) / 60;
+    // anim = GetComponent<Animator>();
+    // //Get them_Animator, which you attach to the GameObject you intend to animate.
+    // m_Animator = gameObject.GetComponent<Animator>();
+    // //Fetch the current Animation clip information for the base layer
+    // m_CurrentClipInfo = this.m_Animator.GetCurrentAnimatorClipInfo(0);
+    // //Access the current length of the clip
+    // m_CurrentClipLength = m_CurrentClipInfo[0].clip.length;
+    // //Access the Animation clip name
+    // m_ClipName = m_CurrentClipInfo[0].clip.name;
+    // //print(m_CurrentClipLength);
+    // timer = (1 / m_CurrentClipLength) / 60;
     StartCoroutine(GetText("http://example.com"));
+  }
+
+  // call externall JS
+  void GetValueFromMqtt(float value)
+  {
+    valueFromMqtt = value;
+    executeAnimationByMqtt(valueFromMqtt);
   }
 
   // Update is called once per frame
   void Update()
   {
-    // musclesStatus ();
+    musclesStatus();
     // getSliderValue();
-    moveAnimationBySlider();
+    // moveAnimationBySlider();
     // string rcv_data = TestJsInCs();
     // string rcv_data = ReadAnimationValue();
     // moveAnimationByText(rcv_data);
+    executeAnimationByMqtt(valueFromMqtt);
+    handler.SetHumanPose(ref miraiPose);
+  }
+
+  private void executeAnimationByMqtt(float value)
+  {
+    float sliderValue = value;
+    // [parameters of bow_3]
+    // 21 Left  Upper Leg Front-Back  :  [0.5 ~ 0.0]
+    // 29 Right Upper Leg Front-Back  :  [0.5 ~ 0.0]
+    // 0  Spine Front-Back            :  [0.0 ~ -0.5]
+    // ?  Root Q.x                    :  [0.0 ~ 0.3]
+    miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
+    miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
+    miraiPose.muscles[(int)Muscles.SpineFrontBack] = 0.0f - 0.5f * sliderValue;
+
+    float rot = 130 * (0.0f + 0.3f * sliderValue);
+    miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
   }
 
   private void moveAnimationByText(string data)
   {
     handler.SetHumanPose(ref miraiPose);
     // anim.Play("Komachi_bow_3", 0, 0.147f + 0.343f * huga);
-    anim.Play("Komachi_bow_3", 0, 0.147f + 0.343f * float.Parse(data));
+    anim.Play("Komachi_bow_3", 0, float.Parse(data));
     // huga += timer;
   }
 
@@ -219,23 +249,23 @@ public class Komachi_bow : MonoBehaviour
     int i = 0;
     while (i < HumanTrait.MuscleCount)
     {
-      //   switch (i)
-      //   {
-      //     case (int)Muscles.LeftArmDownUp:
-      //     case (int)Muscles.LeftArmTwistInOut:
-      //     case (int)Muscles.LeftForearmStretch:
-      //     case (int)Muscles.LeftLowerLegStretch:
-      //     case (int)Muscles.LeftUpperLegFrontBack:
-      //     case (int)Muscles.RightArmDownUp:
-      //     case (int)Muscles.RightArmTwistInOut:
-      //     case (int)Muscles.RightForearmStretch:
-      //     case (int)Muscles.RightLowerLegStretch:
-      //     case (int)Muscles.RightUpperLegFrontBack:
-      //     case (int)Muscles.SpineFrontBack:
-      //       Debug.Log((Muscles)System.Enum.ToObject(typeof(Muscles), i) + ":" + muscleName[i] + ":" + miraiPose.muscles[i]);
-      //       break;
-      //   }
-      Debug.Log((Muscles)System.Enum.ToObject(typeof(Muscles), i) + ":" + muscleName[i] + ":" + miraiPose.muscles[i]);
+      switch (i)
+      {
+        case (int)Muscles.LeftArmDownUp:
+        case (int)Muscles.LeftArmTwistInOut:
+        case (int)Muscles.LeftForearmStretch:
+        case (int)Muscles.LeftLowerLegStretch:
+        case (int)Muscles.LeftUpperLegFrontBack:
+        case (int)Muscles.RightArmDownUp:
+        case (int)Muscles.RightArmTwistInOut:
+        case (int)Muscles.RightForearmStretch:
+        case (int)Muscles.RightLowerLegStretch:
+        case (int)Muscles.RightUpperLegFrontBack:
+        case (int)Muscles.SpineFrontBack:
+          Debug.Log((Muscles)System.Enum.ToObject(typeof(Muscles), i) + ":" + muscleName[i] + ":" + miraiPose.muscles[i]);
+          break;
+      }
+      // Debug.Log((Muscles)System.Enum.ToObject(typeof(Muscles), i) + ":" + muscleName[i] + ":" + miraiPose.muscles[i]);
       i++;
     }
   }
@@ -251,6 +281,8 @@ public class Komachi_bow : MonoBehaviour
     miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
     miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
     miraiPose.muscles[(int)Muscles.SpineFrontBack] = 0.0f - 0.5f * sliderValue;
+
+    Debug.Log(sliderValue.GetType());
 
     float rot = 130 * (0.0f + 0.3f * sliderValue);
     miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);

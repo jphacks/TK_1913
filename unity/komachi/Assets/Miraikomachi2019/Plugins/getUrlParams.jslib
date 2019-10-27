@@ -27,6 +27,10 @@ mergeInto(LibraryManager.library, {
     };
   },
 
+  OutputConsole: function(str) {
+    console.log("str: " + str);
+  },
+
   ReadAnimationValue: function() {
     var value = document.getElementById("animationValue").value;
     console.log(value);
