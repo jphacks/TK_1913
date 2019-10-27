@@ -68,13 +68,14 @@ def register():
     bow.timestamp = data["timestamp"]
     bow.macaddress = data["mac_address"]
     bow.path = fname
-    db.session.add(bow)
-    db.session.commit()
     
     try:
         normalize.normalize(fname)
     except FileNotFoundError:
         return ('', 404)
+    
+    db.session.add(bow)
+    db.session.commit()
 
     return ('', 200)
 
