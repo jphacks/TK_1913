@@ -36,10 +36,6 @@ def handle_mqtt_message(client, userdata, message):
     global last_data
     last_data = formated
 
-@mqtt.on_log()
-def handle_logging(client, userdata, level, buf):
-    print(level, buf)
-
 @app.route("/")
 def index():
     path = "./data"
