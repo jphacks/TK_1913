@@ -17,6 +17,6 @@ class Development(object):
     MQTT_USERNAME = 'flask'
     MQTT_PASSWORD = 'secret'
     MQTT_REFRESH_TIME = 1.0
-    MQTT_TOPIC = 'topic'
+    MQTT_TOPIC = 'bow/bow'
 
 
