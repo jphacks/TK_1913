@@ -5,8 +5,9 @@ from scipy.optimize import curve_fit
 
 SeaLevelPressure = 101000
 
-def sin(x, a, b, c):
-    return a*np.sin(x+b)+c
+def sin(x, a, b, c, d):
+    return a*np.sin(b*x+c)+d
+#    return a*x**6+b*x**5+c*x**4+d*x**3+e*x**2+f*x+g
 
 def pressure_to_height(pressure):
     height = ((SeaLevelPressure/pressure)**(1/5.275)-1)*(15+273.15)/0.0065
@@ -51,9 +52,10 @@ def normalize(csv_file):
         
         transposed_list = np.array(normalized_list).T
         transposed_list = transposed_list.astype(np.float64)
+        transposed_list[0] =  transposed_list[0] - transposed_list[0][0]
         param, _ =curve_fit(sin, transposed_list[0], transposed_list[1])
         for transposed_data_index, transposed_data in enumerate(transposed_list[0]):
-            normalized_list[transposed_data_index][1] = sin(transposed_data, param[0], param[1], param[2])
+            normalized_list[transposed_data_index][1] = sin(transposed_data, param[0], param[1], param[2], param[3])
     
     with open('normalized_data/' + csv_file.split('/')[1], 'w') as wf:
         writer = csv.writer(wf)
