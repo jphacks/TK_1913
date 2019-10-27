@@ -14,85 +14,96 @@
 {% endblock %}
 
 {% block content %}
-  <div class="webgl-content">
-    <div class="header">
-        <h2 class="text-muted">Imano Komachi</h3>
-    </div>
-    <div id="gameContainer" style="width: 960px; height: 600px"></div>
-    <div id="test-wrapper">
-      <input type="button" id="test-input" value="push" />
-    </div>
-    <div class="footer">
-      <div class="webgl-logo"></div>
-      <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
-      <div class="title">komachi</div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-    <script>
-      var gameInstance = UnityLoader.instantiate(
-        "gameContainer",
-        "{{url_for('static', filename = 'imanokomachi/Build/biulds3.json')}}",
-        { onProgress: UnityProgress }
-      );
-      var hostname = "komachi.hongo.ad.jp";
-      var port = 15675;
-      var clientId = "123456";
-      var client = new Paho.MQTT.Client(hostname, port, clientId);
+<div class="webgl-content">
+  <div class="header">
+      <h2 class="text-muted">Imano Komachi</h3>
+  </div>
+  <div id="gameContainer" style="width: 960px; height: 600px"></div>
+  <div id="test-wrapper">
+    <input type="button" id="test-input" value="push" />
+    <input type="button" id="reset-input" value="reset" />
+  </div>
+  <div class="footer">
+    <div class="webgl-logo"></div>
+    <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+    <div class="title">komachi</div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+  <script>
+    var gameInstance = UnityLoader.instantiate(
+      "gameContainer",
+      "{{url_for('static', filename = 'imanokomachi/Build/biulds4.json')}}",
+      { onProgress: UnityProgress }
+    );
+    var hostname = "komachi.hongo.wide.ad.jp";
+    var port = 15675;
+    var clientId = "123456";
+    var client = new Paho.MQTT.Client(hostname, port, clientId);
 
-      var topic = "foo/bar";
+    var topic = "bow/bow";
 
-      var isRadiusSet = false;
-      var radius;
-      var result;
+    var isRadiusSet = false;
+    var radius;
+    var result;
 
-      function convertMsg2Float(str) {
-        var [pres1, pres2] = str.split(", ");
-        pres1 = parseFloat(pres1);
-        pres2 = parseFloat(pres2);
-        if (!isRadiusSet) {
-          radius = pre1 - pres2;
-        }
-        var rad = Math.asin((pres1 - pres2) / radius);
-        if (rad <= (Math.PI * 2) / 9) {
+    function convertMsg2Float(str) {
+      var pres1 = JSON.parse(str).pressure1;
+      var pres2 = JSON.parse(str).pressure2;
+      if (!isRadiusSet) {
+        radius = pres2 - pres1;
+        isRadiusSet = true;
+      }
+      if (pres2 - pres1 > radius) {
+        console.log("=== minus ===");
+        result = 0;
+      } else {
+        var rad = Math.asin((pres2 - pres1) / radius);
+        rad = Math.PI / 2 - rad;
+        if (0 <= rad <= (Math.PI * 2) / 9) {
           result = (rad * 9) / 4 / Math.PI;
-        } else if (rad <= Math.PI / 2) {
+        } else if ((2 / 9) * Math.PI < rad <= Math.PI / 2) {
           result = (rad * 9) / 5 / Math.PI + 0.1;
         } else {
-          console.Error("Calcuration Error!");
+          console.log("???");
         }
-        gameInstance.SendMessage(
-          "mirai2019_dance",
-          "getMqttValue",
-          parseFloat(result)
-        );
       }
+      gameInstance.SendMessage(
+        "mirai2019_dance",
+        "getMqttValue",
+        parseFloat(result) >= 0 ? parseFloat(result) : 0
+      );
+    }
 
-      function main() {
-        client.connect({
-          onSuccess: function() {
-            console.log("Connect Success");
-            client.subscribe(topic, {
-              onSuccess: function() {
-                console.log("Subscribe Success");
-              },
-              onFailure: function() {
-                console.log("Subscribe Failure");
-              }
-            });
-          },
-          onFailure: function() {
-            console.log("Connect Failure");
-          }
-        });
-        client.onMessageArrived = function(msg) {
-          console.log(msg.payloadString);
-          convertMsg2Float(msg.payloadString);
-        };
-      }
-      document.getElementById("test-input").addEventListener("click", () => {
-        console.log("=== mqtt start ===");
-        main();
+    function main() {
+      client.connect({
+        onSuccess: function() {
+          console.log("Connect Success");
+          client.subscribe(topic, {
+            onSuccess: function() {
+              console.log("Subscribe Success");
+            },
+            onFailure: function() {
+              console.log("Subscribe Failure");
+            }
+          });
+        },
+        onFailure: function() {
+          console.log("Connect Failure");
+        }
       });
-    </script>
-  </div>
+      client.onMessageArrived = function(msg) {
+        console.log(msg.payloadString);
+        convertMsg2Float(msg.payloadString);
+      };
+    }
+    var resetTrigger = document.getElementById("reset-input");
+    resetTrigger.addEventListener("click", () => {
+      gameInstance.SendMessage("mirai2019_dance", "getMqttValue", 0);
+    });
+    document.getElementById("test-input").addEventListener("click", () => {
+      console.log("=== mqtt start ===");
+      main();
+    });
+  </script>
+</div>
 {% endblock %}
