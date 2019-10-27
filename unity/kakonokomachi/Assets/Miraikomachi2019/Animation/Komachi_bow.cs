@@ -130,7 +130,7 @@ public class Komachi_bow : MonoBehaviour
   public int lineNum;
   public bool firstTime = true;
 
-  [SerializeField]
+  //[SerializeField]
   public string bow_id = "";
 
 
@@ -151,7 +151,7 @@ public class Komachi_bow : MonoBehaviour
 
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
-    bow_id = "";
+    bow_id = "58";
     
   }
 
@@ -164,8 +164,7 @@ public class Komachi_bow : MonoBehaviour
 
     } else if (firstTime)
     {
-      string url = "/csv?bow_id=" + bow_id;
-      //string url = "http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com/csv?bow_id=" + bow_id;
+      string url = "http://komachi.hongo.wide.ad.jp/csv?bow_id=" + bow_id;
       Debug.Log(url);
       
       StartCoroutine(GetText(url));
