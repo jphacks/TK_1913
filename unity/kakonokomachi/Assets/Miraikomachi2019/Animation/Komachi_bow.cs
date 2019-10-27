@@ -151,7 +151,7 @@ public class Komachi_bow : MonoBehaviour
 
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
-    bow_id = "58";
+    bow_id = "";
     
   }
 
