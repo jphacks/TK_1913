@@ -131,7 +131,7 @@ public class Komachi_bow : MonoBehaviour
   public bool firstTime = true;
 
   //[SerializeField]
-  public string bow_id = "";
+  public string bow_id = "56";
 
 
   // Use this for initialization
@@ -151,7 +151,7 @@ public class Komachi_bow : MonoBehaviour
 
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
-    bow_id = "58";
+    bow_id = "";
     
   }
 
