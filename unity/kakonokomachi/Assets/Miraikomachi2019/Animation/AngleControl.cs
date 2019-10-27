@@ -142,4 +142,9 @@ public class AngleControl : MonoBehaviour
     return angleSlider.normalizedValue;
   }
 
+  public void setSliderValue(float value)
+  {
+    angleSlider.value = value;
+  }
+
 }

@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using UnityEngine.Networking;
 using System;  
 using System.IO;  
-using System.Net; 
+//using System.Net; 
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 public class Komachi_bow : MonoBehaviour
 {
@@ -23,8 +23,8 @@ public class Komachi_bow : MonoBehaviour
   HumanPoseHandler handler;
   AngleControl angleControlScript;
 
-  private string csvText;
-  private List<double[]> csvLines;
+  public string csvText;
+  public List<double[]> csvLines;
   enum Muscles : int
   {
     SpineFrontBack,
@@ -126,12 +126,12 @@ public class Komachi_bow : MonoBehaviour
   private Animator anim;
   public Slider slider;   //Assign the UI slider of your scene in this slot 
   public double t;
-  private double startTime;
+  public double startTime;
   public int lineNum;
-  public bool firstTime=true;
+  public bool firstTime = true;
 
   [SerializeField]
-  public string bow_id="";
+  public string bow_id = "";
 
 
   // Use this for initialization
@@ -151,18 +151,7 @@ public class Komachi_bow : MonoBehaviour
 
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
-
-    bow_id = "39";
-    string url = "http://13.231.107.236/csv?bow_id=" + bow_id;
-    //string url = "http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com/csv?bow_id=" + bow_id;
-    Debug.Log(url);
-    
-    csvText = GetText(url);
-    //Debug.Log(csvText);
-    csvLines = ReadCsv(csvText);
-    startTime = csvLines[0][0];
-    //Debug.Log(startTime);
-    lineNum = 0;
+    bow_id = "";
     
   }
 
@@ -170,9 +159,23 @@ public class Komachi_bow : MonoBehaviour
   
   void Update()
   {
-    t += Time.deltaTime;
-    getPoseFromCsv(csvLines, startTime);
-    handler.SetHumanPose(ref miraiPose);
+    if (bow_id.Length==0)
+    {
+
+    } else if (firstTime)
+    {
+      string url = "/csv?bow_id=" + bow_id;
+      //string url = "http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com/csv?bow_id=" + bow_id;
+      Debug.Log(url);
+      
+      StartCoroutine(GetText(url));
+
+    } else 
+    {
+      t += Time.deltaTime;
+      getPoseFromCsv(csvLines, startTime);
+      handler.SetHumanPose(ref miraiPose);
+    }
   }
 
   private void initZeroPose()
@@ -247,6 +250,9 @@ private void getPoseFromCsv(List<double[]> csvLines, double startTime)
 
         float rot = getRot(sliderValue);
         miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
+
+        double ovearllRatio = 10*t/(csvLines.Last()[0]-startTime);
+        angleControlScript.setSliderValue(float.Parse(ovearllRatio.ToString()));
         return;
       }
     }
@@ -296,30 +302,29 @@ private void getPoseFromCsv(List<double[]> csvLines, double startTime)
     }
 
   }
-  string GetText(string url)
+
+  IEnumerator GetText(string url)
   {
-    WebRequest request = WebRequest.Create(url);
-    
-    // Get the response.  
-    WebResponse response = request.GetResponse();
-    string responseFromServer;
-    // Get the stream containing content returned by the server. 
-    // The using block ensures the stream is automatically closed. 
-    using (Stream dataStream = response.GetResponseStream())
+    using (UnityWebRequest www = UnityWebRequest.Get(url))
     {
-        // Open the stream using a StreamReader for easy access.  
-        StreamReader reader = new StreamReader(dataStream);
-        // Read the content.  
-        responseFromServer = reader.ReadToEnd();
-        // Display the content.  
-        //Debug.Log(responseFromServer);
+      yield return www.SendWebRequest();
+
+      if (www.isNetworkError || www.isHttpError)
+      {
+          Debug.Log(www.error);
+      }
+      else
+      {
+        // Show results as text
+        csvText = www.downloadHandler.text;
+        Debug.Log(csvText);
+        csvLines = ReadCsv(csvText);
+        startTime = csvLines[0][0];
+        //Debug.Log(startTime);
+        lineNum = 0;
+        firstTime = false;
+      }
     }
-
-    // Close the response.  
-    response.Close();
-
-    return responseFromServer;
-
   }
 
   private double str2float(string s)
