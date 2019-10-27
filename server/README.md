@@ -70,7 +70,7 @@ FLASK_APP=run.py flask run
 - なし
 
 ## POST: /bow
-- jsonを受け取り，（/bow_dataのディレクトリ内に）それをそのままtimestampとmac_addressで一意に特定されるファイルに追記していく
+- jsonのリストを受け取り，（/dataのディレクトリ内に）それをそのままtimestampとmac_addressで一意に特定されるファイルに追記していく
 ### Input
 - 以下のフォーマットのjson形式のデータが `POST` で `Content-Type: application/json` で送られてくることを期待
 ```
@@ -94,6 +94,16 @@ FLASK_APP=run.py flask run
 - 何も返さない
   - 現状ではデバッグのためタイムスタンプを返すようになっている
 
+## GET: /register
+- 一連のデータ送信の終了を示す。今までのデータをdbに登録し、データを正規化する
+### QUERY
+以下のフォーマットで取得したいファイル名を指定する
+```
+timestamp="ファイル名"（.csvは書かない）&mac_address="ff:ff:ff:ff:ff:ff"
+``` 
+### Output
+- 何も返さない
+
 ## GET: /last_data
 - 最新のデータを取得
 ### Process
@@ -106,6 +116,7 @@ time,pressure1,pressure2
 ```
 
 ## GET: /csv
+- normalized_data（ディレクトリ）に保存されているcsvファイルを取得
 - bow_data（ディレクトリ）に保存されているcsvファイルを取得
 ### QUERY
 - 以下のフォーマットで取得したいファイル名を指定する
@@ -113,6 +124,7 @@ time,pressure1,pressure2
 file_name="ファイル名"（.csvは書かない）
 ```
 ### Process
+- file_nameで指定されたcsvファイルが/normalized_dataディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
 - file_nameで指定されたcsvファイルが/bow_dataディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
 - 存在していなければ、400bad requestを返す
 ### Output
