@@ -153,6 +153,16 @@ public class Komachi_bow : MonoBehaviour
     angleControlScript = angleSlider.GetComponent<AngleControl>();
 
     bow_id = "39";
+    string url = "http://13.231.107.236/csv?bow_id=" + bow_id;
+    //string url = "http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com/csv?bow_id=" + bow_id;
+    Debug.Log(url);
+    
+    csvText = GetText(url);
+    //Debug.Log(csvText);
+    csvLines = ReadCsv(csvText);
+    startTime = csvLines[0][0];
+    //Debug.Log(startTime);
+    lineNum = 0;
     
   }
 
@@ -160,24 +170,9 @@ public class Komachi_bow : MonoBehaviour
   
   void Update()
   {
-    if (bow_id.Length == 0) {
-    } else if (firstTime) {
-      string url = "http://13.231.107.236/csv?bow_id=" + bow_id;
-      //string url = "http://ec2-13-115-229-32.ap-northeast-1.compute.amazonaws.com/csv?bow_id=" + bow_id;
-      Debug.Log(url);
-      
-      csvText = GetText(url);
-      //Debug.Log(csvText);
-      csvLines = ReadCsv(csvText);
-      startTime = csvLines[0][0];
-      //Debug.Log(startTime);
-      lineNum = 0;
-      firstTime = false;
-    } else {
-      t += Time.deltaTime;
-      getPoseFromCsv(csvLines, startTime);
-      handler.SetHumanPose(ref miraiPose);
-    }
+    t += Time.deltaTime;
+    getPoseFromCsv(csvLines, startTime);
+    handler.SetHumanPose(ref miraiPose);
   }
 
   private void initZeroPose()
