@@ -147,7 +147,7 @@ public class Komachi_bow : MonoBehaviour
     initUpRightPose();
     //musclesStatus();
 
-    valueFromMqtt = 0.5f;
+    valueFromMqtt = 0f;
 
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
@@ -176,7 +176,7 @@ public class Komachi_bow : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    musclesStatus();
+    // musclesStatus();
     // getSliderValue();
     // moveAnimationBySlider();
     // string rcv_data = TestJsInCs();
@@ -184,6 +184,11 @@ public class Komachi_bow : MonoBehaviour
     // moveAnimationByText(rcv_data);
     executeAnimationByMqtt(valueFromMqtt);
     handler.SetHumanPose(ref miraiPose);
+  }
+
+  void getMqttValue(float value)
+  {
+    valueFromMqtt = value;
   }
 
   private void executeAnimationByMqtt(float value)
