@@ -117,6 +117,7 @@ time,pressure1,pressure2
 
 ## GET: /csv
 - normalized_data（ディレクトリ）に保存されているcsvファイルを取得
+- bow_data（ディレクトリ）に保存されているcsvファイルを取得
 ### QUERY
 - 以下のフォーマットで取得したいファイル名を指定する
 ```
@@ -124,6 +125,7 @@ file_name="ファイル名"（.csvは書かない）
 ```
 ### Process
 - file_nameで指定されたcsvファイルが/normalized_dataディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
+- file_nameで指定されたcsvファイルが/bow_dataディレクトリ内に存在するか確認し，存在していればそのファイルを返す。
 - 存在していなければ、400bad requestを返す
 ### Output
 - ファイル名
@@ -133,8 +135,7 @@ file_name="ファイル名"（.csvは書かない）
 ```
 - ファイルの中身
 ```
-time,normalized_angle
-# 1572022431,0.0
-# 1583142413,1.0
+time,pressure1,pressure2
+# 1572022431,999,995
+# 1583142413,1000,994
 ```
-
