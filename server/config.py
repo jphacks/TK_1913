@@ -12,4 +12,11 @@ class Development(object):
     })
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
+    MQTT_BROKER_URL = 'localhost'
+    MQTT_BROLER_PORT = 1883
+    MQTT_USERNAME = 'flask'
+    MQTT_PASSWORD = 'secret'
+    MQTT_REFRESH_TIME = 1.0
+    MQTT_TOPIC = 'topic'
+
 
