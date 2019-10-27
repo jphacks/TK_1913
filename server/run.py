@@ -52,7 +52,7 @@ def index():
 def bow():
     global last_data
     data_list = json.loads(request.get_json())
-    
+
     for data in data_list:
         formated = format_data(data)
         last_data = formated
@@ -63,7 +63,10 @@ def bow():
 
 @app.route("/register", methods = ['GET'])
 def register():
-    data = request.get_json()
+    data = {
+        "mac_address": request.args.get("mac_address"),
+        "timestamp": request.args.get("timestamp")
+    }
     fname = get_filename(data)
 
     bow = Bow()
