@@ -9,7 +9,7 @@
   <script src="{{url_for('static', filename = 'kakonokomachi/TemplateData/UnityProgress.js')}}"></script>  
   <script src="{{url_for('static', filename = 'kakonokomachi/Build/UnityLoader.js')}}"></script>
   <script>
-    var gameInstance = UnityLoader.instantiate("gameContainer", "{{url_for('static', filename = 'kakonokomachi/Build/builds.json')}}", {onProgress: UnityProgress});
+    var gameInstance = UnityLoader.instantiate("gameContainer", "{{url_for('static', filename = 'kakonokomachi/Build/web3.json')}}", {onProgress: UnityProgress});
   </script>
 {% endblock %}
 
