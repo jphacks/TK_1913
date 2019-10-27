@@ -38,7 +38,7 @@ def handle_mqtt_message(client, userdata, message):
 
 @app.route("/")
 def index():
-    bows = db.session.query(Bow.path, Bow.created_at).all()
+    bows = db.session.query(Bow.id, Bow.created_at).all()
     return render_template("bows.html", bows=bows)
 
 @app.route("/bow", methods = ['POST'])
@@ -78,13 +78,18 @@ def register():
 
 @app.route("/csv", methods = ['GET'])
 def get_csv():
-    fname = request.args.get('file_name') + '.csv'
-    files = os.listdir("normalized_data")
-    if fname in files:
-        return send_file('normalized_data/' + fname,
-                mimetype='text/csv',
-                attachment_filename='data/' + fname,
-                as_attachment=True)
+    bow_id = request.args.get('bow_id')
+    bow = db.session.query(Bow).filter(Bow.id==bow_id).first()
+    file_path = bow.path
+    normalized_path = f'normalized_data/{file_path.split("/")[1]}'
+
+    if os.path.exists(normalized_path):
+        return send_file(
+            normalized_path,
+            mimetype='text/csv',
+            attachment_filename=normalized_path,
+            as_attachment=True
+        )
     else:
         return abort(400)
 
