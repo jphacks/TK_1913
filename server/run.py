@@ -38,21 +38,14 @@ def handle_mqtt_message(client, userdata, message):
 
 @app.route("/")
 def index():
-    path = "./data"
-    bow_names = []
-    bow_data = []
-    for x in glob.glob(os.path.join(path, '*.csv')):
-        tmp = os.path.relpath(x, path)
-        bow_names.append(tmp)
-        with open("./data/" + tmp, 'r') as f:
-            bow_data = list(csv.reader(f))
-    return render_template("bows.html", message1 = bow_names, message2 = bow_data)
+    bows = db.session.query(Bow.id, Bow.created_at).all()
+    return render_template("bows.html", bows=bows)
 
 @app.route("/bow", methods = ['POST'])
 def bow():
     global last_data
     data_list = json.loads(request.get_json())
-    
+
     for data in data_list:
         formated = format_data(data)
         last_data = formated
@@ -61,21 +54,42 @@ def bow():
     
     return ('', 200)
 
-@app.route("/regsiter", methods = ['GET'])
-def normalization():
-    fname = f'data/{request.args.get("mac_address")}{request.args.get("timestamp")}.csv'
-    normalize.normalize(fname)
-    return "Success normalization!"
+@app.route("/register", methods = ['GET'])
+def register():
+    data = {
+        "mac_address": request.args.get("mac_address"),
+        "timestamp": request.args.get("timestamp")
+    }
+    fname = get_filename(data)
+
+    bow = Bow()
+    bow.timestamp = data["timestamp"]
+    bow.macaddress = data["mac_address"]
+    bow.path = fname
+    db.session.add(bow)
+    db.session.commit()
+    
+    try:
+        normalize.normalize(fname)
+    except FileNotFoundError:
+        return ('', 404)
+
+    return ('', 200)
 
 @app.route("/csv", methods = ['GET'])
 def get_csv():
-    fname = request.args.get('file_name') + '.csv'
-    files = os.listdir("normalized_data")
-    if fname in files:
-        return send_file('normalized_data/' + fname,
-                mimetype='text/csv',
-                attachment_filename='data/' + fname,
-                as_attachment=True)
+    bow_id = request.args.get('bow_id')
+    bow = db.session.query(Bow).filter(Bow.id==bow_id).first()
+    file_path = bow.path
+    normalized_path = f'normalized_data/{file_path.split("/")[1]}'
+
+    if os.path.exists(normalized_path):
+        return send_file(
+            normalized_path,
+            mimetype='text/csv',
+            attachment_filename=normalized_path,
+            as_attachment=True
+        )
     else:
         return abort(400)
 
