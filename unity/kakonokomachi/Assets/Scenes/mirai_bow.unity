@@ -786,7 +786,7 @@ MonoBehaviour:
   t: 0
   startTime: 0
   lineNum: 0
-  firstTime: 1
+  gotText: 0
   bow_id: 
 --- !u!1 &934392151
 GameObject:

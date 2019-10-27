@@ -12,10 +12,8 @@ using System.Threading.Tasks;
 
 public class Komachi_bow : MonoBehaviour
 {
-  /*
   [DllImport("__Internal")]
   private static extern string GetBowId();
-  */
   
   GameObject mirai, angleSlider;
   Animator miraiAnimator;
@@ -128,17 +126,12 @@ public class Komachi_bow : MonoBehaviour
   public double t;
   public double startTime;
   public int lineNum;
-  public bool firstTime = true;
+  public bool gotText = false;
 
-  //[SerializeField]
   public string bow_id = "";
 
 
   // Use this for initialization
-
-  void GetBowId(string value){
-    bow_id = value;
-  }
   void Start()
   {
     mirai = GameObject.Find("mirai2019_dance");
@@ -151,25 +144,17 @@ public class Komachi_bow : MonoBehaviour
 
     angleSlider = GameObject.Find("Slider");
     angleControlScript = angleSlider.GetComponent<AngleControl>();
-    bow_id = "56";
-    
+    bow_id = GetBowId();
+    string url = "http://komachi.hongo.wide.ad.jp/csv?bow_id=" + bow_id;
+    Debug.Log(url);
+    StartCoroutine(GetText(url));
   }
 
   // Update is called once per frame
   
   void Update()
   {
-    if (bow_id.Length==0)
-    {
-
-    } else if (firstTime)
-    {
-      string url = "http://komachi.hongo.wide.ad.jp/csv?bow_id=" + bow_id;
-      Debug.Log(url);
-      
-      StartCoroutine(GetText(url));
-
-    } else 
+    if (gotText)
     {
       t += Time.deltaTime;
       getPoseFromCsv(csvLines, startTime);
@@ -316,12 +301,11 @@ private void getPoseFromCsv(List<double[]> csvLines, double startTime)
       {
         // Show results as text
         csvText = www.downloadHandler.text;
-        Debug.Log(csvText);
+        //Debug.Log(csvText);
         csvLines = ReadCsv(csvText);
         startTime = csvLines[0][0];
-        //Debug.Log(startTime);
         lineNum = 0;
-        firstTime = false;
+        gotText = true;
       }
     }
   }
