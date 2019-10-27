@@ -101,8 +101,14 @@ def get_last_data():
     return last_data
 
 @app.route("/kakonokomachi")
-def unity():
-    return render_template("index.html")
+def kakonokomachi():
+    bow_id = request.args.get("bow_id")
+    bow = db.session.query(Bow).filter(Bow.id==bow_id).first()    
+    return render_template("kakonokomachi.html", bow=bow)
+
+@app.route("/imanokomachi")
+def imanokomachi():
+    return render_template("imanokomachi.html")
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 80)
