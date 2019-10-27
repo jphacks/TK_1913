@@ -2,8 +2,8 @@ import urllib.request, json
 import time
 
 def start():
-    url = "http://localhost:5000/start"
-    method = "POST"
+    url = "http://localhost:5000/register"
+    method = "GET"
     headers = { "Content-Type": "application/json" }
     data = {
         "timestamp": time.time(),

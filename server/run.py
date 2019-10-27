@@ -61,11 +61,24 @@ def bow():
     
     return ('', 200)
 
-@app.route("/regsiter", methods = ['GET'])
-def normalization():
-    fname = f'data/{request.args.get("mac_address")}{request.args.get("timestamp")}.csv'
-    normalize.normalize(fname)
-    return "Success normalization!"
+@app.route("/register", methods = ['GET'])
+def register():
+    data = request.get_json()
+    fname = get_filename(data)
+
+    bow = Bow()
+    bow.timestamp = data["timestamp"]
+    bow.macaddress = data["mac_address"]
+    bow.path = fname
+    db.session.add(bow)
+    db.session.commit()
+    
+    try:
+        normalize.normalize(fname)
+    except FileNotFoundError:
+        return ('', 404)
+
+    return ('', 200)
 
 @app.route("/csv", methods = ['GET'])
 def get_csv():
