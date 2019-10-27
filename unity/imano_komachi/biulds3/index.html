@@ -17,6 +17,7 @@
       <div id="gameContainer" style="width: 960px; height: 600px"></div>
       <div id="test-wrapper">
         <input type="button" id="test-input" value="push" />
+        <input type="button" id="reset-input" value="reset" />
       </div>
       <div class="footer">
         <div class="webgl-logo"></div>
@@ -30,36 +31,42 @@
           "Build/biulds3.json",
           { onProgress: UnityProgress }
         );
-        var hostname = "komachi.hongo.ad.jp";
+        var hostname = "komachi.hongo.wide.ad.jp";
         var port = 15675;
         var clientId = "123456";
         var client = new Paho.MQTT.Client(hostname, port, clientId);
 
-        var topic = "foo/bar";
+        var topic = "bow/bow";
 
         var isRadiusSet = false;
         var radius;
         var result;
 
         function convertMsg2Float(str) {
-          var [pres1, pres2] = str.split(", ");
-          pres1 = parseFloat(pres1);
-          pres2 = parseFloat(pres2);
+          var pres1 = JSON.parse(str).pressure1;
+          var pres2 = JSON.parse(str).pressure2;
           if (!isRadiusSet) {
-            radius = pre1 - pres2;
+            radius = pres2 - pres1;
+            isRadiusSet = true;
           }
-          var rad = Math.asin((pres1 - pres2) / radius);
-          if (rad <= (Math.PI * 2) / 9) {
-            result = (rad * 9) / 4 / Math.PI;
-          } else if (rad <= Math.PI / 2) {
-            result = (rad * 9) / 5 / Math.PI + 0.1;
+          if (pres2 - pres1 > radius) {
+            console.log("=== minus ===");
+            result = 0;
           } else {
-            console.Error("Calcuration Error!");
+            var rad = Math.asin((pres2 - pres1) / radius);
+            rad = Math.PI / 2 - rad;
+            if (0 <= rad <= (Math.PI * 2) / 9) {
+              result = (rad * 9) / 4 / Math.PI;
+            } else if ((2 / 9) * Math.PI < rad <= Math.PI / 2) {
+              result = (rad * 9) / 5 / Math.PI + 0.1;
+            } else {
+              console.log("???");
+            }
           }
           gameInstance.SendMessage(
             "mirai2019_dance",
             "getMqttValue",
-            parseFloat(result)
+            parseFloat(result) >= 0 ? parseFloat(result) : 0
           );
         }
 
@@ -85,6 +92,10 @@
             convertMsg2Float(msg.payloadString);
           };
         }
+        var resetTrigger = document.getElementById("reset-input");
+        resetTrigger.addEventListener("click", () => {
+          gameInstance.SendMessage("mirai2019_dance", "getMqttValue", 0);
+        });
         document.getElementById("test-input").addEventListener("click", () => {
           console.log("=== mqtt start ===");
           main();

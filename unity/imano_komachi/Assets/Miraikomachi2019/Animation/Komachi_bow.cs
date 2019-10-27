@@ -199,14 +199,37 @@ public class Komachi_bow : MonoBehaviour
     // 29 Right Upper Leg Front-Back  :  [0.5 ~ 0.0]
     // 0  Spine Front-Back            :  [0.0 ~ -0.5]
     // ?  Root Q.x                    :  [0.0 ~ 0.3]
-    miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
-    miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 0.5f * sliderValue;
+    miraiPose.muscles[(int)Muscles.LeftUpperLegFrontBack] = 0.5f - 1f * sliderValue;
+    miraiPose.muscles[(int)Muscles.RightUpperLegFrontBack] = 0.5f - 1f * sliderValue;
     miraiPose.muscles[(int)Muscles.SpineFrontBack] = 0.0f - 0.5f * sliderValue;
 
-    float rot = 130 * (0.0f + 0.3f * sliderValue);
+    float rot = getRot(sliderValue);
     miraiAnimator.transform.RotateAround(new Vector3(0, 0.8f, 0), new Vector3(1, 0, 0), rot - miraiAnimator.transform.rotation.eulerAngles.x);
   }
+  private float linear(float min, float max, float ratio)
+  {
+    return (1 - ratio) * min + ratio * max;
+  }
+  private float getRot(float ratio)
+  {
+    float thres1 = 0.5f;
+    float tilt1 = 0.5f;
+    float max1 = thres1 * 130 * tilt1;
 
+    if (ratio < thres1)
+    {
+      return linear(0, max1, ratio / thres1);
+    }
+    else if (ratio >= thres1)
+    {
+      return linear(max1, 130 * 0.65f, (ratio - thres1) / (1 - thres1));
+    }
+    else
+    {
+      return 130 * 0.65f * ratio;
+    }
+
+  }
   private void moveAnimationByText(string data)
   {
     handler.SetHumanPose(ref miraiPose);
