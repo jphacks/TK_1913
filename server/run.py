@@ -68,13 +68,14 @@ def register():
     bow.timestamp = data["timestamp"]
     bow.macaddress = data["mac_address"]
     bow.path = fname
-    db.session.add(bow)
-    db.session.commit()
     
     try:
         normalize.normalize(fname)
     except FileNotFoundError:
         return ('', 404)
+    
+    db.session.add(bow)
+    db.session.commit()
 
     return ('', 200)
 
@@ -103,7 +104,7 @@ def get_last_data():
 @app.route("/kakonokomachi")
 def kakonokomachi():
     bow_id = request.args.get("bow_id")
-    bow = db.session.query(Bow).filter(Bow.id==bow_id).first()    
+    bow = db.session.query(Bow).filter(Bow.id==bow_id).first()
     return render_template("kakonokomachi.html", bow=bow)
 
 @app.route("/imanokomachi")
