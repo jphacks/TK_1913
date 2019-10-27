@@ -101,8 +101,12 @@ def get_last_data():
     return last_data
 
 @app.route("/kakonokomachi")
-def unity():
-    return render_template("index.html")
+def kakonokomachi():
+    return render_template("kakonokomachi.html")
+
+@app.route("/imanokomachi")
+def imanokomachi():
+    return render_template("imanokomachi.html")
 
 if __name__ == "__main__":
     app.run(host = "0.0.0.0", port = 80)
