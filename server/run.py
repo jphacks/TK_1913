@@ -38,15 +38,8 @@ def handle_mqtt_message(client, userdata, message):
 
 @app.route("/")
 def index():
-    path = "./data"
-    bow_names = []
-    bow_data = []
-    for x in glob.glob(os.path.join(path, '*.csv')):
-        tmp = os.path.relpath(x, path)
-        bow_names.append(tmp)
-        with open("./data/" + tmp, 'r') as f:
-            bow_data = list(csv.reader(f))
-    return render_template("bows.html", message1 = bow_names, message2 = bow_data)
+    bows = db.session.query(Bow.path, Bow.created_at).all()
+    return render_template("bows.html", bows=bows)
 
 @app.route("/bow", methods = ['POST'])
 def bow():
