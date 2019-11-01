@@ -278,13 +278,10 @@ private void getPoseFromCsv(List<double[]> csvLines, double startTime)
     if (ratio < thres1)
     {
       return linear(0, max1, ratio/thres1);
-    }  else if(ratio >= thres1)
+    }  else
     {
       return linear(max1, 130*0.65f, (ratio-thres1)/(1-thres1));
-    } else {
-      return 130 * 0.65f * ratio;
     }
-
   }
 
   IEnumerator GetText(string url)
