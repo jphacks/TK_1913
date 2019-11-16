@@ -21,12 +21,17 @@ mysql> CREATE DATABASE jph2019
 $ pip3 install -r requirements.txt
 ```
 
-## 4. DBの初期化
+## 4.mosquittoのインストール
+```
+$ sudo apt-get install mosquitto
+```
+
+## 5. DBの初期化
 ```
 $ FLASK_APP=run.py flask db init
 ```
 
-## 5. DBのマイグレーション
+## 6. DBのマイグレーション
 ```
 $ FLASK_APP=run.py flask db migrate
 ```
