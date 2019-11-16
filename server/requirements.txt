@@ -5,3 +5,6 @@ PyMySQL
 mysqlclient
 flask-mqtt
 flask-bootstrap
+flask-migrate
+numpy
+scipy
