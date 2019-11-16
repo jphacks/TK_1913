@@ -34,6 +34,7 @@ $ FLASK_APP=run.py flask db init
 ## 6. DBのマイグレーション
 ```
 $ FLASK_APP=run.py flask db migrate
+$ FLASK_APP=run.py flask db upgrade
 ```
 
 # Usage
