@@ -24,6 +24,11 @@ $ pip3 install -r requirements.txt
 ## 4.mosquittoのインストール
 ```
 $ sudo apt-get install mosquitto
+$ echo "listener 1883
+listener 15675
+protocol websockets
+" >> /etc/mosquitto/mosquitto.conf
+systemctl start mosquitto
 ```
 
 ## 5. DBの初期化
