@@ -28,7 +28,7 @@ $ echo "listener 1883
 listener 15675
 protocol websockets
 " >> /etc/mosquitto/mosquitto.conf
-systemctl start mosquitto
+$ systemctl start mosquitto
 ```
 
 ## 5. DBの初期化
