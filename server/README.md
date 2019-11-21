@@ -24,10 +24,10 @@ $ pip3 install -r requirements.txt
 ## 4.mosquittoのインストール
 ```
 $ sudo apt-get install mosquitto
-$ echo "listener 1883
+$ sudo sh -c 'echo "listener 1883
 listener 15675
 protocol websockets
-" >> /etc/mosquitto/mosquitto.conf
+" >> /etc/mosquitto/mosquitto.conf'
 $ systemctl start mosquitto
 ```
 
